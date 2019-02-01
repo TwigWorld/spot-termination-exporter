@@ -23,7 +23,7 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100 
+            - weight: 100
               podAffinityTerm:
                 labelSelector:
                   matchExpressions:
@@ -38,7 +38,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: 9189
               protocol: TCP
           livenessProbe:
             httpGet:
