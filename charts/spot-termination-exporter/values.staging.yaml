@@ -1,0 +1,11 @@
+# Default values for student-reader-access-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+minReplicas: 1
+
+configloader:
+  aws_access_key_id: ''
+  aws_secret_access_key: ''
+  prefix: /INFRA/k8s-nonprod/spot-termination-exporter/
+

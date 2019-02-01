@@ -1,0 +1,6 @@
+**/.git
+**/*.swp
+**/node_modules
+docker-compose.yml
+Makefile
+reports

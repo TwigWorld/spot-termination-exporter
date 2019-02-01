@@ -1,0 +1,44 @@
+# Default values for student-reader-access-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+minReplicas: 1
+
+configloader:
+  aws_access_key_id: ''
+  aws_secret_access_key: ''
+  prefix: /INFRA/k8s-nonprod/spot-termination-exporter/
+
+image:
+  repository: 817276302724.dkr.ecr.eu-west-1.amazonaws.com/infra/spot-termination-exporter
+  tag: latest_master
+  pullPolicy: IfNotPresent
+
+service:
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+  type: ClusterIP
+  port: 8080
+
+paramstore:
+  secrets:
+    - AWS_ACCESS_KEY_ID
+
+configmap:
+  ENABLE_AWS_PARAMSTORE: 'False'
+  RUN_INIT_STEPS: 'False'
+
+resources:
+  limits:
+   cpu: 100m
+   memory: 128Mi
+  requests:
+   cpu: 100m
+   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

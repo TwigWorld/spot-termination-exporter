@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "spot-termination-exporter.shortname" . }}-resource-cleanup
+  labels:
+    release: {{ .Release.Name }}
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": "hook-succeeded"
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ template "spot-termination-exporter.shortname" . }}-resource-cleanup
+        image: 817276302724.dkr.ecr.eu-west-1.amazonaws.com/infra/k8s-kubectl:v1.10.3
+        imagePullPolicy: Always
+        command:
+          - sh
+          - -c
+          - kubectl delete job -n {{ .Release.Namespace }} -l release={{ .Release.Name }}; \
+            kubectl delete configmap -n {{ .Release.Namespace }} -l release={{ .Release.Name }}; \
+            kubectl delete statefulset -n {{ .Release.Namespace }} -l release={{ .Release.Name }}; \
+            kubectl delete clusterrolebindings -n {{ .Release.Namespace }} -l release={{ .Release.Name }}; \
+            kubectl delete serviceaccounts -n {{ .Release.Namespace }} -l release={{ .Release.Name }}; \
+            kubectl delete secret -n {{.Release.Namespace}} -l release={{ .Release.Name }}
+      serviceAccountName: {{ template "spot-termination-exporter.fullname" . }}
+      restartPolicy: Never
+  backoffLimit: 4

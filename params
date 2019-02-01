@@ -1,0 +1,9 @@
+prefix="/INFRA/${ENVIRONMENT}/spot-termination-exporter/"
+
+mandatory_param_array='
+  AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY
+  ENVIRONMENT'
+
+optional_param_array='
+'

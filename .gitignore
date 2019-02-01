@@ -2,5 +2,5 @@
 .build
 .tarballs
 .DS_STORE
-spot-termination-exporter
 
+*.swp

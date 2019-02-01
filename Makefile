@@ -59,3 +59,33 @@ promu:
 
 
 .PHONY: all style format build vet tarball docker promu
+
+up: clean build registry_login
+	ENVIRONMENT=compose \
+	docker-compose up
+
+clean:
+	docker-compose kill && \
+	docker-compose rm --force && \
+	docker volume rm `docker volume ls -f dangling=true -q` || true
+
+
+build: clean
+	ENVIRONMENT=compose \
+	docker-compose build spot-termination-exporter 
+
+stop:
+	docker-compose stop
+
+start: registry_login
+	docker-compose up -d
+
+bash:
+	docker-compose exec spot-termination-exporter bash
+
+registry_login:
+	eval `aws ecr get-login --no-include-email --region eu-west-1`
+
+version:
+	@echo '1'
+

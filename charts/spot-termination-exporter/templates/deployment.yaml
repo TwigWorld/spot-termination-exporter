@@ -1,0 +1,82 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "spot-termination-exporter.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "spot-termination-exporter.name" . }}
+    helm.sh/chart: {{ include "spot-termination-exporter.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.minReplicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "spot-termination-exporter.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "spot-termination-exporter.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100 
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: "app"
+                      operator: In
+                      values:
+                      - {{ template "spot-termination-exporter.name" . }}
+                topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health/
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /health/
+              port: http
+          envFrom:
+          - configMapRef:
+              name: {{ template "spot-termination-exporter.configMapName" . }}
+          - configMapRef:
+              name: {{ template "spot-termination-exporter.fullname" . }}-preload
+          env:
+            - name: RELEASE_REVISION
+              value: {{ .Release.Revision | quote }}
+        {{- if .Values.paramstore.secrets }}
+          {{- range .Values.paramstore.secrets }}
+            - name: {{ . }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "spot-termination-exporter.secretName" $ }}
+                  key: {{ . }}
+          {{- end }}
+        {{- end }}
+
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
